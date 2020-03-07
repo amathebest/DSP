@@ -73,14 +73,26 @@ def kaziskiEstimation(cyphertext):
             kaziskiDistances.append(dist)
     return kaziskiDistances
 
+def factorsOfNumb(num):
+    factors = []
+    for i in range(1, num+1):
+        if num % i == 0:
+            factors.append(i)
+    return factors
+
 # function that implements an attack to the Vigenère cypher.
 # it's composed by two main phases:
 # 1. it tries to found the length of the key by looking at the recurrent characters in the plaintext
 # 2. it then determines the single characters of the key by
 def attack(cyphertext):
     distances = kaziskiEstimation(cyphertext)
-    mcd = math.gcd(distances)
-    print(mcd)
+    all_factors = []
+    for elem in distances:
+        all_factors += factorsOfNumb(elem)
+    mcdCandidates = Counter()
+    for elem in all_factors:
+        mcdCandidates[elem] += 1
+    print(mcdCandidates)
 
     return
 
