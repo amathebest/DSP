@@ -1,5 +1,7 @@
+import sys
 import math
 import pandas as pd
+from numpy import average as avg
 from collections import Counter
 
 # alphabet dimension
@@ -73,6 +75,7 @@ def kaziskiEstimation(cyphertext):
             kaziskiDistances.append(dist)
     return kaziskiDistances
 
+# function that returns the factors of a given number
 def factorsOfNumb(num):
     factors = []
     for i in range(1, num+1):
@@ -80,19 +83,51 @@ def factorsOfNumb(num):
             factors.append(i)
     return factors
 
-# function that implements an attack to the Vigenère cypher.
-# it's composed by two main phases:
-# 1. it tries to found the length of the key by looking at the recurrent characters in the plaintext
-# 2. it then determines the single characters of the key by
-def attack(cyphertext):
-    distances = kaziskiEstimation(cyphertext)
+# function that implements the indexes of coincidence to find the correct length of the unknown key
+def findCorrectLength(cyphertext, distances):
     all_factors = []
     for elem in distances:
         all_factors += factorsOfNumb(elem)
-    mcdCandidates = Counter()
+    lengthCandidates = Counter()
     for elem in all_factors:
-        mcdCandidates[elem] += 1
-    print(mcdCandidates)
+        lengthCandidates[elem] += 1
+    best_candidate = 0
+    best_average_coincidence_idx = sys.float_info.min
+    # looping on candidates: for each candidate we split the cyphertext by columns and compute the coincidence indexes to find the best candidate
+    for candidate in lengthCandidates:
+        if candidate != 1:
+            column_matrix = []
+            for i in range(candidate):
+                row = []
+                column_matrix.append(row)
+            i = 0
+            while i < len(cyphertext):
+                column_matrix[i % candidate].append(cyphertext[i])
+                i += 1
+            indexes = []
+            for row in column_matrix:
+                letter_count = Counter()
+                for letter in row:
+                    letter_count[letter] += 1
+                row_coincidence_idx = 0
+                for elem in letter_count:
+                    row_coincidence_idx += (letter_count[elem]/len(row))*((letter_count[elem]-1)/len(row))
+                indexes.append(row_coincidence_idx)
+            avg_idxs = avg(indexes)
+            # updating best values
+            if avg_idxs > best_average_coincidence_idx:
+                best_average_coincidence_idx = avg_idxs
+                best_candidate = candidate
+    print(best_candidate, best_average_coincidence_idx)
+    return best_candidate
+
+# function that implements an attack to the Vigenère cypher.
+# it's composed by two main phases:
+# 1. it tries to found the length of the key by looking at the recurrent characters in the plaintext
+# 2. it then determines the single characters of the key by using the indexes of coincidence
+def attack(cyphertext):
+    distances = kaziskiEstimation(cyphertext)
+    key_length = findCorrectLength(cyphertext, distances)
 
     return
 
