@@ -1,7 +1,6 @@
 import math
 import numpy as np
-from itertools import product
-from scipy.special import binom
+from itertools import combinations
 from random import randrange
 from numpy import average as avg
 
@@ -99,22 +98,19 @@ def attack(plaintext, cyphertext, keylen):
     pstar_mat = []
     cstar_mat = []
 
-    for elem in list(product(pchunks, pchunks)):
-        if elem[0] != elem[1]:
-            pstar_mat.append(np.transpose(elem))
+    for elem in list(combinations(pchunks, keylen)):
+        pstar_mat.append(np.transpose(elem))
 
-    for elem in list(product(cchunks, cchunks)):
-        if elem[0] != elem[1]:
-            cstar_mat.append(np.transpose(elem))
-    for elem in pstar_mat:
-        print(elem)
+    for elem in list(combinations(cchunks, keylen)):
+        cstar_mat.append(np.transpose(elem))
+
     for idx, elem in enumerate(pstar_mat):
         if math.gcd(int(round(np.linalg.det(elem), 0)), 26) == 1:
             chosen_idx = idx
             break
 
     if chosen_idx == -1:
-        return 0 -1
+        return 0, -1
 
     pstar = pstar_mat[chosen_idx]
     cstar = cstar_mat[chosen_idx]
