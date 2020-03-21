@@ -1,17 +1,21 @@
 import math
 import numpy as np
+from itertools import product
+from scipy.special import binom
 from random import randrange
 from numpy import average as avg
 
 # alphabet dimension
 ALPHA_DIM = 26
 
+# function that converts a string to an array of numbers (corresponding ASCII)
 def convertStringToNumbers(input):
     convNumbers = []
     for i in range(len(input)):
         convNumbers.append(ord(input[i])-97)
     return convNumbers
 
+# function that converts an array of numbers to a string (corresponding ASCII)
 def convertNumbersToString(input):
     convString = ""
     for i in range(len(input)):
@@ -77,92 +81,106 @@ def invertMatrix(inputMat):
             invertedMat[j,i] = bji % ALPHA_DIM
     return invertedMat
 
+# function that executes a known-plaintext attack to the Hill cypher.
+# it assumes the knowledge of some plaintext messages and the respective cyphertexts.
+# it accepts as parameters a plaintext, a cyphertext and the key length and returns the key and an eventual error code
+# if the attack couldn't be executed.
+def attack(plaintext, cyphertext, keylen):
+    p = convertStringToNumbers(plaintext)
+    c = convertStringToNumbers(cyphertext)
+
+    # splitting into chunks of keylen elements
+    pchunks = [p[i:i+keylen] for i in range(0, len(p), keylen)]
+    cchunks = [c[i:i+keylen] for i in range(0, len(c), keylen)]
+
+    chosen_idx = -1
+
+    # these two arrays will contain the combinations of the chunks, to try to find one that has the inverse
+    pstar_mat = []
+    cstar_mat = []
+
+    for elem in list(product(pchunks, pchunks)):
+        if elem[0] != elem[1]:
+            pstar_mat.append(np.transpose(elem))
+
+    for elem in list(product(cchunks, cchunks)):
+        if elem[0] != elem[1]:
+            cstar_mat.append(np.transpose(elem))
+
+    for idx, elem in enumerate(pstar_mat):
+        if math.gcd(int(round(np.linalg.det(elem), 0)), 26) == 1:
+            chosen_idx = idx
+            break
+
+    if chosen_idx == -1:
+        return 0 -1
+
+    pstar = pstar_mat[chosen_idx]
+    cstar = cstar_mat[chosen_idx]
+
+    # inverting pstar
+    pstar_inv = invertMatrix(pstar)
+
+    # finding the key by computing the multiplication k = c* x p*^-1
+    key = np.matmul(cstar, pstar_inv)
+    modkey = np.zeros(key.shape, dtype = int)
+    for i in range(len(key)):
+        for j in range(len(key[i])):
+            modkey[j][i] = key[j][i] % 26
+
+    return modkey, 0
 
 def main():
     # computation mode:
     # a = attack
     # ed = encryption/decryption
-    mode = "a"
+    mode = "ed"
 
     if mode == "a":
-
         plaintext = "friday"
-        cyphertext = "obxjlp"
-        m = 3
-        # key [3]:
-        # 11 21 3
-        # 21 0 8
-        # 25 0 23
+        cyphertext = "pqcfku"
+        keylen = 2
 
-        p = convertStringToNumbers(plaintext)
-        c = convertStringToNumbers(cyphertext)
+        key, error = attack(plaintext, cyphertext, keylen)
 
-        pstar = []
-
-        for i in range(m):
-            row = []
-
-
+        if error == -1:
+            print("The attack couldn't be executed. No pstar inverse was found.")
+        else:
+            print("Key found: ")
+            print(key)
     else:
-        plaintext = "friday"
+        plaintext = "meetattwo"
         keylen = 3 # len(p)
 
         p = convertStringToNumbers(plaintext)
+
+        # splitting p in blocks
+        pstar = []
         for i in range(int(len(p)/keylen)):
             row = []
             for j in range(keylen):
                 row.append(p[i*keylen+j])
-            p.append(row)
+            pstar.append(row)
 
         key = createKey(keylen)
-
-        c = encrypt(p, key)
-
+        c = encrypt(pstar, key)
         invertedKey = invertMatrix(key)
-
         decrypted = decrypt(c, invertedKey)
 
-
-
-        print("Plain: " + plaintext)
-        for row in p:
-            print(row)
-
-        cyphertext = ""
-        for block in c:
-            for numb in block:
-                cyphertext += chr(numb + 97)
-        print("Cypher: " + cyphertext)
-        for row in c:
-            print(row)
-
-        print("Key:")
-        for row in key:
-            print(row)
-
-        print("Key inversa:")
-        for row in invertedKey:
-            print(row)
-
-        print("Decypher text")
-        for row in decrypted:
-            print(row)
-
-        pdec = ""
+        # output section
+        print("Plaintext:")
+        print(plaintext)
+        print("Cyphertext:")
+        print(c)
+        print("Decrypted text:")
+        decrypted_text = ""
         for block in decrypted:
             for numb in block:
                 letter = chr(numb + 97)
-                pdec += letter
-        print(pdec)
+                decrypted_text += letter
+        print(decrypted_text)
 
-    '''
-    # attacking the cypher
-    key = attack(cyphertext)
-    print(key)
-    # decrypting the text
-    decrypted = decrypt(cyphertext, key)
-    print(decrypted)
-    '''
+    return
 
 if __name__ == "__main__":
     main()
