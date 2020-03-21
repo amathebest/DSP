@@ -106,7 +106,8 @@ def attack(plaintext, cyphertext, keylen):
     for elem in list(product(cchunks, cchunks)):
         if elem[0] != elem[1]:
             cstar_mat.append(np.transpose(elem))
-
+    for elem in pstar_mat:
+        print(elem)
     for idx, elem in enumerate(pstar_mat):
         if math.gcd(int(round(np.linalg.det(elem), 0)), 26) == 1:
             chosen_idx = idx
@@ -134,12 +135,12 @@ def main():
     # computation mode:
     # a = attack
     # ed = encryption/decryption
-    mode = "ed"
+    mode = "a"
 
     if mode == "a":
-        plaintext = "friday"
-        cyphertext = "pqcfku"
-        keylen = 2
+        plaintext = "maybetomorrowok"
+        cyphertext = "oggdusyuorqdaak"
+        keylen = 3
 
         key, error = attack(plaintext, cyphertext, keylen)
 
@@ -149,7 +150,7 @@ def main():
             print("Key found: ")
             print(key)
     else:
-        plaintext = "meetattwo"
+        plaintext = "maybetomorrowok"
         keylen = 3 # len(p)
 
         p = convertStringToNumbers(plaintext)
@@ -168,11 +169,15 @@ def main():
         decrypted = decrypt(c, invertedKey)
 
         # output section
-        print("Plaintext:")
+        print("\nPlaintext:")
         print(plaintext)
-        print("Cyphertext:")
-        print(c)
-        print("Decrypted text:")
+        print("\nCyphertext:")
+        cyphertext = ""
+        for block in c:
+            for numb in block:
+                cyphertext += chr(numb + 97)
+        print(cyphertext)
+        print("\nDecrypted text:")
         decrypted_text = ""
         for block in decrypted:
             for numb in block:
