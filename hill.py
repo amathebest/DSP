@@ -1,4 +1,3 @@
-import sys
 import math
 import numpy as np
 from random import randrange
@@ -7,34 +6,58 @@ from numpy import average as avg
 # alphabet dimension
 ALPHA_DIM = 26
 
-# function that takes a single letter of the plaintext, the corresponding letter of the key and
-# returns the shifted letter
-def shiftSingleLetter(pi, ki):
-    plainidx_number = ord(pi) - 97
-    keyidx_number = ord(ki) - 97
-    cypheridx_number = ((plainidx_number + keyidx_number) % ALPHA_DIM) + 97
-    return chr(cypheridx_number)
-
-
 # function that takes a plaintext, a key and returns the cyphertext.
 # each letter of the cyphertext is obtained by linear combination with plaintext and key:
 # ci = ki1*p1 + ... + kim*pm mod 26
 def encrypt(plaintext, key):
     cyphertext = []
-    for i in range(len(plaintext)):
-        acc = 0
-        for elem in key[i]:
-            acc += elem*plaintext[i]
-        cyphertext.append(acc % ALPHA_DIM)
+    result = np.matmul(plaintext, key)
+    for i in range(len(result)):
+        cyphertext.append(result[i] % ALPHA_DIM)
     return cyphertext
 
 # function that takes a cyphertext, a key and returns the corresponding plaintext.
-def decrypt(cyphertext, key):
+def decrypt(cyphertext, keyinv):
     plaintext = []
-    for i in range(len(cyphertext)):
-        plaintext.append(shiftSingleLetter(cyphertext[i], key[i % len(key)]))
-    plaintext = "".join(plaintext)
+    result = np.matmul(cyphertext, keyinv)
+    for i in range(len(result)):
+        plaintext.append(result[i] % ALPHA_DIM)
     return plaintext
+
+# function that returns a key that is invertible mod ALPHA_DIM
+def createKey(length):
+    found = False
+    # checking if the matrix is invertible
+    while not found:
+        key = []
+        for i in range(length):
+            row = []
+            for j in range(length):
+                row.append(randrange(ALPHA_DIM))
+            key.append(row)
+        if math.gcd(int(round(np.linalg.det(key), 0)), ALPHA_DIM) == 1:
+            found = True
+    return np.array(key)
+
+# function that computes the multiplicative inverse of a given number.
+# Used in the matrix inversion mod ALPHA_DIM
+def computeMultiplicativeInverse(number):
+    multiplicativeinverse = 0
+    for i in range(ALPHA_DIM):
+        if (number * i) % ALPHA_DIM == 1:
+            multiplicativeinverse = i
+            break
+    return multiplicativeinverse
+
+# function that computes the inversion of the key.
+def invertMatrix(inputMat):
+    invertedMat = np.zeros(inputMat.shape, dtype = int)
+    for i in range(inputMat.shape[0]):
+        for j in range(inputMat.shape[1]):
+            redMatrix = np.delete(np.delete(inputMat, i, 0), j, 1)
+            bji = (-1)**(i+j+2) * int(round(np.linalg.det(redMatrix), 0)) * computeMultiplicativeInverse(int(round(np.linalg.det(inputMat), 0) % ALPHA_DIM))
+            invertedMat[j,i] = bji % ALPHA_DIM
+    return invertedMat
 
 
 def main():
@@ -44,34 +67,25 @@ def main():
     if mode == "a":
         print("todo")
     else:
-        plaintext = "four"
+        plaintext = "fox"
         p = []
         for i in range(len(plaintext)):
             p.append(ord(plaintext[i]) - 97)
-        found = False
 
-        # checking if the matrix is invertible
-        while not found:
-            key = []
-            for i in range(len(plaintext)):
-                row = []
-                for j in range(len(plaintext)):
-                    row.append(randrange(ALPHA_DIM))
-                key.append(row)
-            if np.linalg.det(key) != 0:
-                found = True
+        key = createKey(len(p))
 
         # reading the plaintext and applying the block encryption
         c = encrypt(p, key)
 
+        invertedKey = invertMatrix(key)
 
+        dec = decrypt(c, invertedKey)
 
 
 
         print("Plain: " + plaintext)
         for row in p:
             print(row)
-        print("\n")
 
         cyphertext = ""
         for elem in c:
@@ -79,9 +93,17 @@ def main():
         print("Cypher: " + cyphertext)
         for row in c:
             print(row)
-        print("\n")
 
+        print("Key:")
         for row in key:
+            print(row)
+
+        print("Key inversa:")
+        for row in invertedKey:
+            print(row)
+
+        print("Decypher text")
+        for row in dec:
             print(row)
 
     '''

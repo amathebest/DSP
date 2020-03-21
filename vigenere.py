@@ -168,7 +168,7 @@ def main():
         cyphertext = readAndTrimBlanks(input_path)
     else:
         input_path = "input/plaintext.txt"
-        key = "ambroisethomas"
+        key = ""
 
         # reading the plaintext and applying the block encryption
         plaintext = readAndTrimBlanks(input_path)
