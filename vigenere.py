@@ -161,9 +161,9 @@ def attack(cyphertext):
 
 def main():
     # computation variables
-    mode = "d"
+    mode = "a"
 
-    if mode == "d":
+    if mode == "a":
         input_path = "input/cypher.txt"
         cyphertext = readAndTrimBlanks(input_path)
     else:
