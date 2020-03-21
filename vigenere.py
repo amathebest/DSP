@@ -1,11 +1,12 @@
 import sys
 import math
-import pandas as pd
+import numpy as np
 from numpy import average as avg
 from collections import Counter
 
 # alphabet dimension
 ALPHA_DIM = 26
+p_vec = [0.0812, 0.0149, 0.0271, 0.0432, 0.1202, 0.023, 0.0203, 0.0592, 0.0731, 0.01, 0.069, 0.0398, 0.0261, 0.0695, 0.0768, 0.0182, 0.011, 0.0602, 0.0628, 0.091, 0.0288, 0.0111, 0.0209, 0.017, 0.0211, 0.007]
 
 # function that reads an input from given path and trims every new line and space.
 # it returns the trimmed string as plaintext
@@ -16,13 +17,10 @@ def readAndTrimBlanks(path):
 
 # function that takes a single letter of the plaintext, the corresponding letter of the key and
 # returns the shifted letter
-def shiftSingleLetter(pi, ki, direction):
+def shiftSingleLetter(pi, ki):
     plainidx_number = ord(pi) - 97
     keyidx_number = ord(ki) - 97
-    if direction == "forward":
-        cypheridx_number = ((plainidx_number + keyidx_number) % ALPHA_DIM) + 97
-    else:
-        cypheridx_number = ((plainidx_number - keyidx_number) % ALPHA_DIM) + 97
+    cypheridx_number = ((plainidx_number + keyidx_number) % ALPHA_DIM) + 97
     return chr(cypheridx_number)
 
 # function that takes a plaintext, a key and returns the cyphertext.
@@ -31,7 +29,7 @@ def shiftSingleLetter(pi, ki, direction):
 def encrypt(plaintext, key):
     cyphertext = []
     for i in range(len(plaintext)):
-        cyphertext.append(shiftSingleLetter(plaintext[i], key[i % len(key)], "forward"))
+        cyphertext.append(shiftSingleLetter(plaintext[i], key[i % len(key)]))
     cyphertext = "".join(cyphertext)
     return cyphertext
 
@@ -39,12 +37,12 @@ def encrypt(plaintext, key):
 def decrypt(cyphertext, key):
     plaintext = []
     for i in range(len(cyphertext)):
-        plaintext.append(shiftSingleLetter(cyphertext[i], key[i % len(key)], "backwards"))
+        plaintext.append(shiftSingleLetter(cyphertext[i], key[i % len(key)]))
     plaintext = "".join(plaintext)
     return plaintext
 
 # function that executes the Kaziski's Estimation to determine the key's length.
-# it returns a
+# it returns a collection of distances for every trigram found
 def kaziskiEstimation(cyphertext):
     kaziskiDistances = []
     dist_matrix = []
@@ -85,6 +83,7 @@ def factorsOfNumb(num):
 
 # function that implements the indexes of coincidence to find the correct length of the unknown key
 def findCorrectLength(cyphertext, distances):
+    # gathering all possible candidates
     all_factors = []
     for elem in distances:
         all_factors += factorsOfNumb(elem)
@@ -93,9 +92,10 @@ def findCorrectLength(cyphertext, distances):
         lengthCandidates[elem] += 1
     best_candidate = 0
     best_average_coincidence_idx = sys.float_info.min
+    best_col_matrix = []
     # looping on candidates: for each candidate we split the cyphertext by columns and compute the coincidence indexes to find the best candidate
     for candidate in lengthCandidates:
-        if candidate != 1:
+        if candidate != 1 and candidate < 30:
             column_matrix = []
             for i in range(candidate):
                 row = []
@@ -118,33 +118,69 @@ def findCorrectLength(cyphertext, distances):
             if avg_idxs > best_average_coincidence_idx:
                 best_average_coincidence_idx = avg_idxs
                 best_candidate = candidate
+                best_col_matrix = column_matrix
     print(best_candidate, best_average_coincidence_idx)
-    return best_candidate
+    return best_candidate, best_col_matrix
+
+# function that given a cyphertext organized by columns and the length of the key, returns the actual key
+def findKey(column_cypher, m):
+    key = ""
+    # looping on the rows of the column cypher
+    for i in range(m):
+        row = column_cypher[i]
+        indexes = []
+        # looping through every possible shift of the letters that are in a row
+        for j in range(26):
+            shifted_row = []
+            for elem in row:
+                shifted_row.append(shiftSingleLetter(elem, chr(j+97)))
+            letter_count = Counter()
+            for elem in shifted_row:
+                letter_count[elem] += 1
+            # calculating the indexes and taking the letter that corresponds to the shift that gives the maximum index
+            row_coincidence_idx = 0
+            for elem in letter_count:
+                row_coincidence_idx += (letter_count[elem]/len(row))*p_vec[ord(elem)-97]
+            indexes.append(row_coincidence_idx)
+        letter = np.argmax(indexes)
+        key += chr(letter+97)
+
+    print(key)
+    return key
 
 # function that implements an attack to the Vigenère cypher.
 # it's composed by two main phases:
-# 1. it tries to found the length of the key by looking at the recurrent characters in the plaintext
-# 2. it then determines the single characters of the key by using the indexes of coincidence
+# - it tries to found the length of the key by looking at the recurrent characters in the plaintext
+# - it determines each single character of the key
 def attack(cyphertext):
     distances = kaziskiEstimation(cyphertext)
-    key_length = findCorrectLength(cyphertext, distances)
+    key_length, column_cypher = findCorrectLength(cyphertext, distances)
+    key = findKey(column_cypher, key_length)
 
-    return
+    return key
 
 def main():
     # computation variables
-    input_path = "input/message.txt"
-    key = "ambroisethomas"
+    mode = "d"
 
-    # reading the plaintext and applying the block encryption
-    plaintext = readAndTrimBlanks(input_path)
-    cyphertext = encrypt(plaintext, key)
+    if mode == "d":
+        input_path = "input/cypher.txt"
+        cyphertext = readAndTrimBlanks(input_path)
+    else:
+        input_path = "input/plaintext.txt"
+        key = "ambroisethomas"
+
+        # reading the plaintext and applying the block encryption
+        plaintext = readAndTrimBlanks(input_path)
+        cyphertext = encrypt(plaintext, key)
+
 
     # attacking the cypher
-    attack(cyphertext)
-
+    key = attack(cyphertext)
+    print(key)
     # decrypting the text
     decrypted = decrypt(cyphertext, key)
+    print(decrypted)
 
 
 if __name__ == "__main__":
