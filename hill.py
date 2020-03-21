@@ -6,22 +6,40 @@ from numpy import average as avg
 # alphabet dimension
 ALPHA_DIM = 26
 
+def convertStringToNumbers(input):
+    convNumbers = []
+    for i in range(len(input)):
+        convNumbers.append(ord(input[i])-97)
+    return convNumbers
+
+def convertNumbersToString(input):
+    convString = ""
+    for i in range(len(input)):
+        convString += chr(input[i]+97)
+    return convString
+
 # function that takes a plaintext, a key and returns the cyphertext.
 # each letter of the cyphertext is obtained by linear combination with plaintext and key:
 # ci = ki1*p1 + ... + kim*pm mod 26
 def encrypt(plaintext, key):
     cyphertext = []
-    result = np.matmul(plaintext, key)
-    for i in range(len(result)):
-        cyphertext.append(result[i] % ALPHA_DIM)
+    for block in plaintext:
+        cypherblock = []
+        result = np.matmul(block, key)
+        for i in range(len(result)):
+            cypherblock.append(result[i] % ALPHA_DIM)
+        cyphertext.append(cypherblock)
     return cyphertext
 
 # function that takes a cyphertext, a key and returns the corresponding plaintext.
 def decrypt(cyphertext, keyinv):
     plaintext = []
-    result = np.matmul(cyphertext, keyinv)
-    for i in range(len(result)):
-        plaintext.append(result[i] % ALPHA_DIM)
+    for block in cyphertext:
+        plainblock = []
+        result = np.matmul(block, keyinv)
+        for i in range(len(result)):
+            plainblock.append(result[i] % ALPHA_DIM)
+        plaintext.append(plainblock)
     return plaintext
 
 # function that returns a key that is invertible mod ALPHA_DIM
@@ -61,25 +79,48 @@ def invertMatrix(inputMat):
 
 
 def main():
-    # computation variables
-    mode = "ed"
+    # computation mode:
+    # a = attack
+    # ed = encryption/decryption
+    mode = "a"
 
     if mode == "a":
-        print("todo")
+
+        plaintext = "friday"
+        cyphertext = "obxjlp"
+        m = 3
+        # key [3]:
+        # 11 21 3
+        # 21 0 8
+        # 25 0 23
+
+        p = convertStringToNumbers(plaintext)
+        c = convertStringToNumbers(cyphertext)
+
+        pstar = []
+
+        for i in range(m):
+            row = []
+
+
     else:
-        plaintext = "fox"
-        p = []
-        for i in range(len(plaintext)):
-            p.append(ord(plaintext[i]) - 97)
+        plaintext = "friday"
+        keylen = 3 # len(p)
 
-        key = createKey(len(p))
+        p = convertStringToNumbers(plaintext)
+        for i in range(int(len(p)/keylen)):
+            row = []
+            for j in range(keylen):
+                row.append(p[i*keylen+j])
+            p.append(row)
 
-        # reading the plaintext and applying the block encryption
+        key = createKey(keylen)
+
         c = encrypt(p, key)
 
         invertedKey = invertMatrix(key)
 
-        dec = decrypt(c, invertedKey)
+        decrypted = decrypt(c, invertedKey)
 
 
 
@@ -88,8 +129,9 @@ def main():
             print(row)
 
         cyphertext = ""
-        for elem in c:
-            cyphertext += chr(elem + 97)
+        for block in c:
+            for numb in block:
+                cyphertext += chr(numb + 97)
         print("Cypher: " + cyphertext)
         for row in c:
             print(row)
@@ -103,8 +145,15 @@ def main():
             print(row)
 
         print("Decypher text")
-        for row in dec:
+        for row in decrypted:
             print(row)
+
+        pdec = ""
+        for block in decrypted:
+            for numb in block:
+                letter = chr(numb + 97)
+                pdec += letter
+        print(pdec)
 
     '''
     # attacking the cypher
