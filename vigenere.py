@@ -166,7 +166,7 @@ def plotOutput(plaintext):
     letter_freq = Counter({k:v/len(plaintext) for k,v in letter_count.items()})
     plt.bar(letter_freq.keys(), letter_freq.values())
     plt.show()
-    return
+    return letter_count
 
 def mgramsDistribution(plaintext):
     counters = []
@@ -197,16 +197,37 @@ def mgramsDistribution(plaintext):
     for idx, counter in enumerate(counters):
         letter_freq = Counter({k:v/len(plaintext) for k,v in counter.items()})
         meanfreqs[str(idx+2) + "-grams"] = mean(letter_freq.values())
-
+    print("Frequencies of the m-grams:")
     for elem in meanfreqs:
         print(elem, meanfreqs.get(elem))
     return
 
+# function that computes the coincidence index for the given plaintext.
+def coincidenceIndexComputation(letter_count, plaintext):
+    indexes = []
+    row_coincidence_idx = 0
+    for elem in letter_count:
+        indexes.append((letter_count[elem]/len(plaintext))*((letter_count[elem]-1)/len(plaintext)))
+    print("Coincidence indexes:")
+    print(indexes)
+    return indexes
+
+# function that computes the entropy for the given plaintext
+def entropyComputation(indexes, plaintext):
+    entropy = 0
+    for index in indexes:
+        entropy += index*math.log2(index)
+    entropy = -entropy
+    print("Entropy:")
+    print(entropy)
+    return
+
 # function that executes analysis compelling the exercise 3.1 on the Set 1 of homeworks
 def analysis(plaintext):
-    plotOutput(plaintext)
+    letter_count = plotOutput(plaintext)
     mgramsDistribution(plaintext)
-
+    indexes = coincidenceIndexComputation(letter_count, plaintext)
+    entropyComputation(indexes, plaintext)
     return
 
 def main():
