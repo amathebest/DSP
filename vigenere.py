@@ -3,6 +3,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import average as avg
+from statistics import mean
 from collections import Counter
 
 # alphabet dimension
@@ -169,6 +170,7 @@ def plotOutput(plaintext):
 
 def mgramsDistribution(plaintext):
     counters = []
+    meanfreqs = {}
     # looping from 2 to 4 (both included) to find the 2-grams, 3-grams and 4-grams and count them
     for m in range(2, 5):
         count = Counter()
@@ -191,14 +193,20 @@ def mgramsDistribution(plaintext):
         for mgram in mgrams:
             count[mgram] += 1
         counters.append(count)
+    # converting in average frequencies
+    for idx, counter in enumerate(counters):
+        letter_freq = Counter({k:v/len(plaintext) for k,v in counter.items()})
+        meanfreqs[str(idx+2) + "-grams"] = mean(letter_freq.values())
 
+    for elem in meanfreqs:
+        print(elem, meanfreqs.get(elem))
     return
 
 # function that executes analysis compelling the exercise 3.1 on the Set 1 of homeworks
 def analysis(plaintext):
     plotOutput(plaintext)
     mgramsDistribution(plaintext)
-    
+
     return
 
 def main():
