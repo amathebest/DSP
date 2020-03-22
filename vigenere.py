@@ -94,6 +94,7 @@ def findCorrectLength(cyphertext, distances):
         lengthCandidates[elem] += 1
     best_candidate = 0
     best_average_coincidence_idx = sys.float_info.min
+    best_coincidence_idx = []
     best_col_matrix = []
     # looping on candidates: for each candidate we split the cyphertext by columns and compute the coincidence indexes to find the best candidate
     for candidate in lengthCandidates:
@@ -121,11 +122,13 @@ def findCorrectLength(cyphertext, distances):
                 best_average_coincidence_idx = avg_idxs
                 best_candidate = candidate
                 best_col_matrix = column_matrix
+                best_coincidence_idx = indexes
     return best_candidate, best_col_matrix
 
 # function that given a cyphertext organized by columns and the length of the key, returns the actual key
 def findKey(column_cypher, m):
     key = ""
+    products = []
     # looping on the rows of the column cypher
     for i in range(m):
         row = column_cypher[i]
@@ -144,8 +147,8 @@ def findKey(column_cypher, m):
                 row_coincidence_idx += (letter_count[elem]/len(row))*p_vec[ord(elem)-97]
             indexes.append(row_coincidence_idx)
         letter = np.argmax(indexes)
+        products.append(max(indexes))
         key += chr(letter+97)
-
     return key
 
 # function that implements an attack to the Vigenère cypher.
@@ -236,7 +239,7 @@ def main():
     # an = analysis
     # ed = encryption/decryption by specifying a key
 
-    mode = "an"
+    mode = "at"
     input_path = "input/plaintext.txt"
 
     if mode == "at":
