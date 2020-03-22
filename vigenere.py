@@ -1,6 +1,7 @@
 import sys
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 from numpy import average as avg
 from collections import Counter
 
@@ -11,9 +12,9 @@ p_vec = [0.0812, 0.0149, 0.0271, 0.0432, 0.1202, 0.023, 0.0203, 0.0592, 0.0731, 
 # function that reads an input from given path and trims every new line and space.
 # it returns the trimmed string as plaintext
 def readAndTrimBlanks(path):
-    with open(path, 'r') as infile:
+    with open(path, 'r', encoding = "utf-8") as infile:
         message = infile.read().replace("\n", "").replace(" ", "")
-    return message
+    return message.lower()
 
 # function that takes a single letter of the plaintext, the corresponding letter of the key and
 # returns the shifted letter
@@ -119,7 +120,6 @@ def findCorrectLength(cyphertext, distances):
                 best_average_coincidence_idx = avg_idxs
                 best_candidate = candidate
                 best_col_matrix = column_matrix
-    print(best_candidate, best_average_coincidence_idx)
     return best_candidate, best_col_matrix
 
 # function that given a cyphertext organized by columns and the length of the key, returns the actual key
@@ -145,7 +145,6 @@ def findKey(column_cypher, m):
         letter = np.argmax(indexes)
         key += chr(letter+97)
 
-    print(key)
     return key
 
 # function that implements an attack to the Vigenère cypher.
@@ -156,32 +155,82 @@ def attack(cyphertext):
     distances = kaziskiEstimation(cyphertext)
     key_length, column_cypher = findCorrectLength(cyphertext, distances)
     key = findKey(column_cypher, key_length)
-
     return key
 
-def main():
-    # computation variables
-    mode = "a"
+# function that plots each letter with its specific frequency in the text
+def plotOutput(plaintext):
+    letter_count = Counter()
+    for letter in plaintext:
+        letter_count[letter] += 1
+    letter_freq = Counter({k:v/len(plaintext) for k,v in letter_count.items()})
+    plt.bar(letter_freq.keys(), letter_freq.values())
+    plt.show()
+    return
 
-    if mode == "a":
+def mgramsDistribution(plaintext):
+    counters = []
+    # looping from 2 to 4 (both included) to find the 2-grams, 3-grams and 4-grams and count them
+    for m in range(2, 5):
+        count = Counter()
+        # finding mgrams
+        mgrams = []
+        for i in range(len(plaintext)):
+            if m == 2:
+                if i < len(plaintext)-2:
+                    new_mgram = plaintext[i]+plaintext[i+1]
+                    mgrams.append(new_mgram)
+            elif m == 3:
+                if i < len(plaintext)-3:
+                    new_mgram = plaintext[i]+plaintext[i+1]+plaintext[i+2]
+                    mgrams.append(new_mgram)
+            else:
+                if i < len(plaintext)-4:
+                    new_mgram = plaintext[i]+plaintext[i+1]+plaintext[i+2]+plaintext[i+3]
+                    mgrams.append(new_mgram)
+        # counting the m-grams
+        for mgram in mgrams:
+            count[mgram] += 1
+        counters.append(count)
+
+    return
+
+# function that executes analysis compelling the exercise 3.1 on the Set 1 of homeworks
+def analysis(plaintext):
+    plotOutput(plaintext)
+    mgramsDistribution(plaintext)
+    
+    return
+
+def main():
+    # computation modes:
+    # at = attack
+    # an = analysis
+    # ed = encryption/decryption by specifying a key
+
+    mode = "an"
+    input_path = "input/plaintext.txt"
+
+    if mode == "at":
         input_path = "input/cypher.txt"
         cyphertext = readAndTrimBlanks(input_path)
+    elif mode == "an":
+        analysis(readAndTrimBlanks(input_path))
+        return
     else:
-        input_path = "input/plaintext.txt"
-        key = ""
-
+        key = "thereisalwayshope"
         # reading the plaintext and applying the block encryption
         plaintext = readAndTrimBlanks(input_path)
         cyphertext = encrypt(plaintext, key)
-
-
-    # attacking the cypher
+        print("Cypher text:")
+        print(cyphertext)
+        # attacking the cypher
     key = attack(cyphertext)
-    print(key)
     # decrypting the text
     decrypted = decrypt(cyphertext, key)
+    print("Decrypted text: ")
     print(decrypted)
 
+    return
 
 if __name__ == "__main__":
     main()
