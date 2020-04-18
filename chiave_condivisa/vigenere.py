@@ -216,21 +216,21 @@ def coincidenceIndexComputation(letter_count, plaintext):
     return indexes
 
 # function that computes the entropy for the given plaintext
-def entropyComputation(indexes, plaintext):
+def entropyComputation(indexes):
     entropy = 0
     for index in indexes:
         entropy += index*math.log2(index)
     entropy = -entropy
     print("Entropy:")
     print(entropy)
-    return
+    return entropy
 
 # function that executes analysis compelling the exercise 3.1 on the Set 1 of homeworks
 def analysis(plaintext):
     letter_count = plotOutput(plaintext)
     mgramsDistribution(plaintext)
     indexes = coincidenceIndexComputation(letter_count, plaintext)
-    entropyComputation(indexes, plaintext)
+    entropy = entropyComputation(indexes)
     return
 
 def main():
