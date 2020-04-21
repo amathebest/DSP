@@ -2,6 +2,7 @@ import math
 import datetime as dt
 import numpy as np
 
+# input and setup
 print("Insert a: ")
 a = int(input())
 print("Insert m: ")
@@ -16,6 +17,7 @@ binary_exp = np.binary_repr(m)
 # processing
 initial_dt = dt.datetime.now()
 
+# algorithm that computes the quick exponentiation
 for i in range(len(binary_exp)):
     d = (d*d) % n
     c = 2*c
@@ -24,5 +26,7 @@ for i in range(len(binary_exp)):
         c += 1
 ending_dt = dt.datetime.now()
 time = ending_dt - initial_dt
+
+# output
 print(str(a) + "^" + str(m) + " mod " + str(n) + " = " + str(d))
 print("The computation took", time.microseconds*1000, "ms.")
