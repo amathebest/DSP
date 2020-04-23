@@ -3,7 +3,7 @@ import datetime as dt
 import numpy as np
 
 # function that computes the quick exponentiation of a**m mod n
-def exp(a, m, n, time):
+def exp(a, m, n, time_analysis):
     d = 1
     c = 0
     binary_exp = np.binary_repr(m)
@@ -21,7 +21,7 @@ def exp(a, m, n, time):
 
     ending_dt = dt.datetime.now()
     time = ending_dt - initial_dt
-    if time:
+    if time_analysis:
         print("The computation took", time.microseconds*1000, "ms.")
 
     return d
