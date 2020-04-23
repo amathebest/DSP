@@ -15,6 +15,23 @@ def encryption(pubkey, m):
 def decryption(privkey, c):
     return qe.exp(c, privkey[0], privkey[1], False)
 
+# function that executes an attack by assuming the private exponent d is known to the attacker
+def decryptionexp(e, d, n):
+    # rewriting e*d - 1 as 2^r * m, with m odd
+    m = e*d-1
+    r = 0
+    while m % 2 == 0:
+        m //= 2
+        r += 1
+
+    x = randrange(2, n-1)
+    # checking if each subsequent element of the sequence is equal to -1 mod n
+    for i in range(r):
+        if pow(x, 2**i*m, n) == n-1:
+            return False
+
+    return
+
 def main():
     # generating p and q as big random primes
     exp = 100
@@ -33,18 +50,23 @@ def main():
     pubkey = (e, n)
     privkey = (d, n)
 
-    # plaintext creation, convertion to integer, cypher, decypher and reconversion
+    # plaintext creation, convertion to integer, encryption, decryption and reconversion
     plaintext = "Hello, World!"
     print("Plain text:", plaintext)
+
     message = int(binascii.hexlify(plaintext.encode()), 16)
 
     cyphertext = encryption(pubkey, message)
 
-    decryptedtext = decryption(privkey, cyphertext)
+    decyphertext = decryption(privkey, cyphertext)
 
-    convertedtext = binascii.unhexlify(hex(decryptedtext)[2:]).decode()
-    
+    convertedtext = binascii.unhexlify(hex(decyphertext)[2:]).decode()
+
     print("Decrypted text :", convertedtext)
+
+    # attack section
+    decryptionexp(e, d, n)
+
     return
 
 
