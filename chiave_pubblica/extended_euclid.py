@@ -7,14 +7,20 @@ def EuclidGCD(a, b):
         mcd, x, y = EuclidGCD(b_mod_a, a)
         return (mcd, y - b_div_a * x, x)
 
-# input
-print("Insert a: ")
-a = int(input())
-print("Insert b: ")
-b = int(input())
+def main():
+    # input
+    print("Insert a: ")
+    a = int(input())
+    print("Insert b: ")
+    b = int(input())
 
-# computation
-mcd, x, y = EuclidGCD(a, b)
+    # computation
+    mcd, x, y = EuclidGCD(a, b)
 
-# output
-print("MCD:", mcd, "x:", x, "y:", y)
+    # output
+    print("MCD:", mcd, "x:", x, "y:", y)
+
+    return
+
+if __name__ == "__main__":
+    main()

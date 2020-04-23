@@ -29,8 +29,6 @@ def millerRabinTest(n):
 
     return True
 
-
-
 def main():
     print("Insert a number n to test with Miller-Rabin:")
     n = int(input())
@@ -41,6 +39,8 @@ def main():
         print(n, "is composite.")
     else:
         print(n, "is probably prime.")
+
+    return
 
 if __name__ == "__main__":
     main()
