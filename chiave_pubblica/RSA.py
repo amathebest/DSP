@@ -16,19 +16,25 @@ def decryption(privkey, c):
     return qe.exp(c, privkey[0], privkey[1], False)
 
 # function that executes an attack by assuming the private exponent d is known to the attacker
+# it accepts e, d and n and returns the non-trivial factor of n found by the procedure
 def decryptionexp(e, d, n):
-    # rewriting e*d - 1 as 2^r * m, with m odd
-    m = e*d-1
-    r = 0
-    while m % 2 == 0:
-        m //= 2
-        r += 1
 
-    x = randrange(2, n-1)
-    # checking if each subsequent element of the sequence is equal to -1 mod n
-    for i in range(r):
-        if pow(x, 2**i*m, n) == n-1:
-            return False
+    while True:
+        x = randrange(2, n-1)
+
+        if eu.EuclidGCD(x, n)[0] != 1:
+            return
+        # rewriting e*d - 1 as 2^r * m, with m odd
+        m = e*d-1
+        r = 0
+        while m % 2 == 0:
+            m //= 2
+            r += 1
+
+        # checking if each subsequent element of the sequence is equal to -1 mod n
+        for i in range(r):
+            if pow(x, 2**i*m, n) == n-1:
+                return False
 
     return
 
