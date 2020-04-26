@@ -1,4 +1,5 @@
 import binascii
+import numpy as np
 import pandas as pd
 import datetime as dt
 from random import randrange
@@ -66,19 +67,20 @@ def decryptionexp(e, d, n, testing):
             r += 1
 
         seq = []
-        # # checking if each subsequent element of the sequence is equal to -1 mod n
-        for i in range(r):
-            xi = qe.exp(x, 2**i*m, n, False)
-            seq.append(xi)
-            if xi == 1:
-                break
 
-        print(seq)
-        if seq[-2] != 1 and seq[-2] != -1:
-            if testing:
-                return eu.EuclidGCD(seq[-2]+1, n)[0], counter
-            else:
-                return eu.EuclidGCD(seq[-2]+1, n)[0]
+        if qe.exp(x, m, n, False) != 1:
+            # checking if each subsequent element of the sequence is equal to -1 mod n
+            for i in range(r):
+                xi = qe.exp(x, 2**i*m, n, False)
+                seq.append(xi)
+                if xi == 1:
+                    break
+
+            if seq[-2] != 1 and seq[-2] != -1:
+                if testing:
+                    return eu.EuclidGCD(seq[-2]+1, n)[0], counter
+                else:
+                    return eu.EuclidGCD(seq[-2]+1, n)[0]
 
     return -1
 
@@ -88,7 +90,8 @@ def decryptionexp(e, d, n, testing):
 # - variance of that time.
 def testing(exp):
     stats = pd.DataFrame(columns = ['iterations', 'time'])
-
+    print("Computing the attack 100 times...")
+    
     for i in range(100):
         n, pubkey, privkey = setup(exp)
 
@@ -104,7 +107,14 @@ def testing(exp):
 
         stats = stats.append(row, ignore_index = True)
 
+    mean_iterations = np.mean(stats['iterations'])
+    mean_time = np.mean(stats['time'])
+    var_time = np.var(stats['time'])
 
+    print("Statistic on the attack:")
+    print("Mean iterations required to converge:", mean_iterations)
+    print("Mean time required to converge:", mean_time, "[us]")
+    print("Variance of the time required to converge:", var_time, "[us]")
 
     return
 

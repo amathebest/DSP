@@ -22,7 +22,7 @@ def exp(a, m, n, time_analysis):
     ending_dt = dt.datetime.now()
     time = ending_dt - initial_dt
     if time_analysis:
-        print("The computation took", time.microseconds*1000, "ms.")
+        print("The computation took", time.microseconds, "us.")
 
     return d
 
