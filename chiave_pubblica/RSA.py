@@ -50,13 +50,13 @@ def decryptionexp(e, d, n, testing):
         counter += 1
 
         x = randrange(2, n-1)
-        mcd = eu.EuclidGCD(x, n)[0]
+        gcd = eu.EuclidGCD(x, n)[0]
 
-        if mcd != 1:
+        if gcd != 1:
             if testing:
-                return mcd, counter
+                return gcd, counter
             else:
-                return mcd
+                return gcd
 
         # rewriting e*d - 1 as 2^r * m, with m odd
         m = e*d-1
@@ -73,19 +73,21 @@ def decryptionexp(e, d, n, testing):
             if xi == 1:
                 break
 
+        print(seq)
         if seq[-2] != 1 and seq[-2] != -1:
             if testing:
                 return eu.EuclidGCD(seq[-2]+1, n)[0], counter
             else:
                 return eu.EuclidGCD(seq[-2]+1, n)[0]
+
     return -1
 
 # function that tests the attack on 100 different RSA modules and prints:
 # - the average iteration taken by the algorithm to converge;
 # - average time elapsed to converge;
 # - variance of that time.
-def testing():
-    stats = pd.Dataframe(columns = ['iterations', 'time'])
+def testing(exp):
+    stats = pd.DataFrame(columns = ['iterations', 'time'])
 
     for i in range(100):
         n, pubkey, privkey = setup(exp)
@@ -98,12 +100,11 @@ def testing():
         ending_dt = dt.datetime.now()
         time = ending_dt - initial_dt
 
-        row = {'iterations': iterations, 'time', time.microseconds}
+        row = {'iterations': iterations, 'time': time.microseconds}
 
         stats = stats.append(row, ignore_index = True)
 
 
-    
 
     return
 
