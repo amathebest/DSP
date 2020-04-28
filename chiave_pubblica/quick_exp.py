@@ -1,6 +1,7 @@
 import math
 import datetime as dt
 import numpy as np
+#from decimal import Decimal
 
 # function that computes the quick exponentiation of a**m mod n
 def exp(a, m, n, time_analysis):

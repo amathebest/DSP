@@ -160,7 +160,7 @@ def testCRTOptimization(pubkey, privkey, p, q):
     return
 
 def main():
-    mode = "a"
+    mode = "t"
     exp = 100
     pubkey, privkey, n, p, q = setup(exp)
 
