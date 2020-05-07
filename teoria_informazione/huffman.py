@@ -78,14 +78,13 @@ def decode():
     for line in values:
         codes[line.split(" ")[1]] = line.split(" ")[0]
 
-    print(codes)
     encoded_message = sys.argv[1]
     decoded_message = ""
     i = 0
     j = 0
 
-    while i < len(encoded_message):
-        possible_chars = [value for key, value in codes.items() if encoded_message[j:i] in key[:i]]
+    while i <= len(encoded_message):
+        possible_chars = [value for key, value in codes.items() if encoded_message[j:i] in key[:i-j]]
         print(encoded_message[j:i], possible_chars, i)
         if len(possible_chars) == 1:
             decoded_message += possible_chars[0]
