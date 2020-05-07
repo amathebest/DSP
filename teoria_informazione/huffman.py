@@ -1,4 +1,4 @@
-
+import sys
 
 class Node():
     xi = ""
@@ -67,6 +67,33 @@ def encode():
 
 # function that returns the decoded string given a prefix-free code and a binary string
 def decode():
+    code_path = "input/code.txt"
+    with open(code_path, 'r') as c_file:
+        values = c_file.read().split('\n')
+
+    values = values[:-1] # this strips away the last empty line
+
+    codes = {}
+
+    for line in values:
+        codes[line.split(" ")[1]] = line.split(" ")[0]
+
+    print(codes)
+    encoded_message = sys.argv[1]
+    decoded_message = ""
+    i = 0
+    j = 0
+
+    while i < len(encoded_message):
+        possible_chars = [value for key, value in codes.items() if encoded_message[j:i] in key[:i]]
+        print(encoded_message[j:i], possible_chars, i)
+        if len(possible_chars) == 1:
+            decoded_message += possible_chars[0]
+            j = i
+        i += 1
+
+
+    print(decoded_message)
 
     return
 
@@ -77,7 +104,7 @@ def main():
     # variable that allows the user to choose the mode of the program:
     # e = encode mode
     # d = decode mode
-    mode = "e"
+    mode = "d"
 
     if mode == "e":
         encode()
