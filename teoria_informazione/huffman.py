@@ -15,6 +15,7 @@ class Node():
 
     def append_encoding(self, symbol):
         self.ci = symbol + self.ci
+        pass
 
 # function that verifies whether a given code is prefix-free
 def verify_code(codes):
@@ -65,11 +66,7 @@ def encode():
         new_node = Node(node_1.xi + node_2.xi, node_1.pi + node_2.pi)
         nodes.append(new_node)
 
-    print("Letters given as input have been encoded:")
-    for node in og_nodes:
-        print(node)
-
-    return
+    return og_nodes
 
 # function that returns the decoded string given a prefix-free code and a binary string
 def decode():
@@ -107,10 +104,13 @@ def main():
     # variable that allows the user to choose the mode of the program:
     # e = encode mode
     # d = decode mode
-    mode = "d"
+    mode = "e"
 
     if mode == "e":
-        encode()
+        nodes = encode()
+        print("Letters given as input have been encoded:")
+        for node in nodes:
+            print(node)
     else:
         decoded_message = decode()
         if decoded_message != -1:
