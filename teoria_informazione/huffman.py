@@ -16,6 +16,13 @@ class Node():
     def append_encoding(self, symbol):
         self.ci = symbol + self.ci
 
+# function that verifies whether a given code is prefix-free
+def verify_code(codes):
+    for key in codes:
+        for key_to_check in codes:
+            if key in key_to_check[:len(key)] and key != key_to_check:
+                return False
+    return True
 
 # function that creates the code with optimal lenght for a given alphabet X and probability distribution p
 def encode():
@@ -64,7 +71,6 @@ def encode():
 
     return
 
-
 # function that returns the decoded string given a prefix-free code and a binary string
 def decode():
     code_path = "input/code.txt"
@@ -77,7 +83,12 @@ def decode():
     for line in values:
         codes[line.split(" ")[1]] = line.split(" ")[0]
 
-    encoded_message = sys.argv[1]
+    # checking whether the given code is prefix-free. the code halts if the boolean returned is false
+    is_prefix_free = verify_code(codes)
+    if not is_prefix_free:
+        return -1
+
+    encoded_message = sys.argv[1] # input binary string
     decoded_message = ""
     i = 0
     j = 0
@@ -92,9 +103,6 @@ def decode():
 
     return decoded_message
 
-
-
-
 def main():
     # variable that allows the user to choose the mode of the program:
     # e = encode mode
@@ -105,13 +113,12 @@ def main():
         encode()
     else:
         decoded_message = decode()
-        print("The decoded message is: \n" + decoded_message)
+        if decoded_message != -1:
+            print("The decoded message is: \n" + decoded_message)
+        else:
+            print("The given coded is not prefix-free, so the string could not be decoded.")
 
     return
-
-
-
-
 
 if __name__ == "__main__":
     main()
