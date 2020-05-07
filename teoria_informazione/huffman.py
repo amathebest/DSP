@@ -26,7 +26,6 @@ def encode():
     values = values[:-1] # this strips away the last empty line
 
     nodes = []
-
     # creating the nodes with the values from file
     for value in values:
         curr_xi, curr_pi = value.split(" ")[0], float(value.split(" ")[1])
@@ -59,7 +58,7 @@ def encode():
         new_node = Node(node_1.xi + node_2.xi, node_1.pi + node_2.pi)
         nodes.append(new_node)
 
-
+    print("Letters given as input have been encoded:")
     for node in og_nodes:
         print(node)
 
