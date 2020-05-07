@@ -70,11 +70,10 @@ def decode():
     code_path = "input/code.txt"
     with open(code_path, 'r') as c_file:
         values = c_file.read().split('\n')
-
     values = values[:-1] # this strips away the last empty line
 
+    # storing the codes into a dictionary
     codes = {}
-
     for line in values:
         codes[line.split(" ")[1]] = line.split(" ")[0]
 
@@ -83,18 +82,15 @@ def decode():
     i = 0
     j = 0
 
+    # looping through the encoded message and parsing each encoded letter one at a time
     while i <= len(encoded_message):
         possible_chars = [value for key, value in codes.items() if encoded_message[j:i] in key[:i-j]]
-        print(encoded_message[j:i], possible_chars, i)
         if len(possible_chars) == 1:
             decoded_message += possible_chars[0]
             j = i
         i += 1
 
-
-    print(decoded_message)
-
-    return
+    return decoded_message
 
 
 
@@ -108,8 +104,8 @@ def main():
     if mode == "e":
         encode()
     else:
-        decode()
-
+        decoded_message = decode()
+        print("The decoded message is: \n" + decoded_message)
 
     return
 
