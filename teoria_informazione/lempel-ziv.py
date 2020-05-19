@@ -4,29 +4,29 @@
 
 
 def encode():
-    input_str = 'AAAABBCDEABCDABCAAABCDEEEEEECBBBBBBDDAAE'
+    code_path = "input/lz-input.txt"
+    with open(code_path, 'r') as input_file:
+        infile = input_file.read()
+
+    # this variable will contain the dictionary entries that will be produced as the input file is parsed block by block
     dict = {}
 
     # indexes that will read the string, end is always increased by one, when an undiscovered block is found start will be put to end
     start = 0
     end = 1
 
-    progress = 0
-
     while True:
-        if not len(input_str) > start+end-1:
+        if not len(infile) > start+end-1:
             break
-        sub_str = input_str[start:start + end]
-        print(sub_str, start, end)
-        if sub_str in dict:
+
+        block = infile[start:start+end]
+
+        if block in dict:
             end += 1
         else:
-            dict[sub_str] = progress
+            dict[block] = len(dict)
             start += end
             end = 1
-            progress += 1
-
-    print(dict)
 
     return
 
