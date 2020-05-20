@@ -1,13 +1,10 @@
 
 
-
-
-
 def encode():
     code_path = "input/lz-input.txt"
     with open(code_path, 'r') as input_file:
-        infile = input_file.read()
-
+        infile = input_file.read().replace("\n", "")
+    print(infile)
     # this variable will contain the dictionary entries that will be produced as the input file is parsed block by block
     dict = {}
 
@@ -24,26 +21,18 @@ def encode():
         if block in dict:
             end += 1
         else:
-            dict[block] = len(dict)
+            dict[block] = bin(len(dict))
             start += end
             end = 1
 
+    print(dict)
     return
-
-
-
-
-
-
-
 
 
 
 def decode():
 
     return
-
-
 
 
 
@@ -60,7 +49,9 @@ def main():
     mode = "e"
 
     if mode == "e":
-        encode()
+        #encode()
+        compressed = compress("AAAABBCDEABCDABCAAABCDEEEEEECBBBBBBDDAAE")
+        print(compressed)
 
     else:
         decode()

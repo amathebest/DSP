@@ -83,6 +83,11 @@ def decode():
     # checking whether the given code is prefix-free. the code halts if the boolean returned is false
     is_prefix_free = verify_code(codes)
     if not is_prefix_free:
+        print("The given coded is not prefix-free, so the string could not be decoded.")
+        return -1
+
+    if len(sys.argv) < 2:
+        print("Usage: python huffman.py <insert_binary_string_to_decode_here>")
         return -1
 
     encoded_message = sys.argv[1] # input binary string
@@ -116,7 +121,7 @@ def main():
         if decoded_message != -1:
             print("The decoded message is: \n" + decoded_message)
         else:
-            print("The given coded is not prefix-free, so the string could not be decoded.")
+
 
     return
 
